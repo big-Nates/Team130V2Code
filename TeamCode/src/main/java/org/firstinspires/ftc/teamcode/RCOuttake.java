@@ -13,21 +13,24 @@ public class RCOuttake extends RobCommand {
 
     public RCOuttake(Hardware hardware, double power) {
         this.hardware = hardware;
-        this.position = position;
         this.power = power;
-        action = hardware.shooter.setPowerAction(this.power);
+        action = hardware.shooter.setPowerAction(power);
     }
 
     public RCOuttake(Hardware hardware,double power, boolean skipWait) {
         this.hardware = hardware;
-        this.position = position;
         this.power = power;
         this.skipWait = skipWait;
-        action = hardware.shooter.setPowerAction(this.power);
+        action = hardware.shooter.setPowerAction(power);
+    }
+
+    public RCOuttake(Hardware hardware, int velocity){
+        this.hardware = hardware;
+        action = hardware.shooter.setVelocityAction(velocity);
     }
 
     public void run() {
-        hardware.logMessage(false, "RCLiftExtend", "Command Ran, set to position " + position);
+        hardware.logMessage(false, "RCLiftExtend", "Command Ran, set to power " + this.power);
         action.run(hardware.packet);
     }
 
@@ -46,7 +49,6 @@ public class RCOuttake extends RobCommand {
     @Override
     public String toString() {
         return "RCLiftExtend{" +
-                ", position=" + position +
                 ", power=" + power +
                 ", skipWait=" + skipWait +
                 '}';

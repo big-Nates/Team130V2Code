@@ -56,53 +56,24 @@ public class Auto2526 extends OpMode {
 
         if(!isFarStartingPos && !isRed){
             //Close Blue
-            startPose = new Pose2d(48,48, Math.toRadians(45));
+            startPose = new Pose2d(53,50, Math.toRadians(45));
             drive = new MecanumDrive(hardwareMap, startPose);
             drive.initialPose = startPose;
             hardware.drive = drive;
             hardware.gateServo.setPosition(ServoGate.CLOSE_POS);
-        }
-        else if(isFarStartingPos && !isRed){
-            //Far Red
-            startPose = new Pose2d(-60,12, Math.toRadians(30));
-            drive = new MecanumDrive(hardwareMap, startPose);
-            drive.initialPose = startPose;
-            hardware.drive = drive;
-            hardware.gateServo.setPosition(ServoGate.CLOSE_POS);
-        }
-        else if(!isFarStartingPos){
-            //Close Blue
-            startPose = new Pose2d(48,-48, Math.toRadians(-45));
-            drive = new MecanumDrive(hardwareMap, startPose);
-            drive.initialPose = startPose;
-            hardware.drive = drive;
-            hardware.gateServo.setPosition(ServoGate.CLOSE_POS);
-        }
-        else{
-            //Far Blue
-            startPose = new Pose2d(-60,-12, Math.toRadians(-30));
-            drive = new MecanumDrive(hardwareMap, startPose);
-            drive.initialPose = startPose;
-            hardware.drive = drive;
-            hardware.gateServo.setPosition(ServoGate.CLOSE_POS);
-        }
-
-
-        if(!isFarStartingPos && !isRed){
-            //Close Blue
             //Sync Commands
             RobCommand gateCloseSync = new RCServoGate(this.hardware, RCServoGate.CMD_CLOSE, true);
-            RobCommand firstRowCollected = new RCRoadrunner1(drive.actionBuilder(new Pose2d(2,24, Math.toRadians(90)))
-                    .strafeToConstantHeading(new Vector2d(2, 50))
+            RobCommand firstRowCollected = new RCRoadrunner1(drive.actionBuilder(drive.localizer.getPose())
+                    .strafeToConstantHeading(new Vector2d(-5, 53))
                     .build(), hardware);
-            RobCommand secondRowCollected = new RCRoadrunner1(drive.actionBuilder(new Pose2d(-38,24, Math.toRadians(90)))
-                    .strafeToConstantHeading(new Vector2d(-38, 50))
+            RobCommand secondRowCollected = new RCRoadrunner1(drive.actionBuilder(drive.localizer.getPose())
+                    .strafeToConstantHeading(new Vector2d(-38, 53))
                     .build(), hardware);
 
             //Score Preloaded artifacts
             hardware.robo130.addCommand(new RCOuttake(this.hardware,0.9, true));
-            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(48,48, Math.toRadians(45)))
-                    .strafeToLinearHeading(new Vector2d(24, 24), Math.toRadians(45))
+            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(drive.localizer.getPose())
+                    .strafeToLinearHeading(new Vector2d(17, 14), Math.toRadians(45))
                     .build(), hardware));
             hardware.robo130.addCommand(new RCWait(this.hardware, 1.5)); //possibly too fast
             hardware.robo130.addCommand(new RCServoGate(this.hardware, RCServoGate.CMD_OPEN, false));
@@ -117,8 +88,8 @@ public class Auto2526 extends OpMode {
             hardware.robo130.addCommand(new RCOuttake(this.hardware,0));
 
             //Collect First Row
-            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(24,24, Math.toRadians(45)))
-                    .strafeToLinearHeading(new Vector2d(2, 24), Math.toRadians(90))
+            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(drive.localizer.getPose())
+                    .strafeToLinearHeading(new Vector2d(-5, 29), Math.toRadians(90))
                     .build(), hardware));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
             hardware.robo130.addCommand(firstRowCollected);
@@ -126,8 +97,8 @@ public class Auto2526 extends OpMode {
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
 
             //Score First row
-            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(-4,50, Math.toRadians(90)))
-                    .strafeToLinearHeading(new Vector2d(30, 24), Math.toRadians(50))
+            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(drive.localizer.getPose())
+                    .strafeToLinearHeading(new Vector2d(17, 14), Math.toRadians(50))
                     .build(), hardware));
             hardware.robo130.addCommand(new RCServoGate(this.hardware, RCServoGate.CMD_OPEN, false));
             hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
@@ -142,7 +113,7 @@ public class Auto2526 extends OpMode {
             hardware.robo130.addCommand(new RCOuttake(this.hardware,0));
 
             //Collect Second Row
-            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(30,24, Math.toRadians(50)))
+            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(drive.localizer.getPose())
                     .strafeToLinearHeading(new Vector2d(-38, 24), Math.toRadians(90))
                     .build(), hardware));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
@@ -151,8 +122,8 @@ public class Auto2526 extends OpMode {
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
 
             //Score Second row
-            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(-26,50, Math.toRadians(90)))
-                    .strafeToLinearHeading(new Vector2d(34, 24), Math.toRadians(50))
+            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(drive.localizer.getPose())
+                    .strafeToLinearHeading(new Vector2d(17, 14), Math.toRadians(50))
                     .build(), hardware));
             hardware.robo130.addCommand(new RCServoGate(this.hardware, RCServoGate.CMD_OPEN, true));
             hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
@@ -167,13 +138,17 @@ public class Auto2526 extends OpMode {
             hardware.robo130.addCommand(new RCOuttake(this.hardware,0));
 
             //Leave
-            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(34,24, Math.toRadians(50)))
-                    .strafeToLinearHeading(new Vector2d(-5, 24), Math.toRadians(90))
+            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(drive.localizer.getPose())
+                    .strafeToLinearHeading(new Vector2d(0, 12), Math.toRadians(90))
                     .build(), hardware));
 
         }
         else if(!isFarStartingPos){
-            //Close Red
+            //Close Blue
+            startPose = new Pose2d(48,-48, Math.toRadians(-45));
+            drive = new MecanumDrive(hardwareMap, startPose);
+            drive.initialPose = startPose;
+            hardware.gateServo.setPosition(ServoGate.CLOSE_POS);
             //Sync Commands
             RobCommand gateCloseSync = new RCServoGate(this.hardware, RCServoGate.CMD_CLOSE, true);
             RobCommand firstRowCollected = new RCRoadrunner1(drive.actionBuilder(new Pose2d(2,-24, Math.toRadians(-90)))
@@ -256,8 +231,6 @@ public class Auto2526 extends OpMode {
                     .build(), hardware));
         }
 
-
-
         commandsGrabbed = true;
         telemetry.addData("Trajectory Creation", "Is complete");
         telemetry.update();
@@ -267,9 +240,7 @@ public class Auto2526 extends OpMode {
     @Override
     public void init_loop() {
         hardware.updateValues();
-
         super.init_loop();
-
         hardware.init_loop();
     }
 
@@ -316,95 +287,4 @@ public class Auto2526 extends OpMode {
         hardware.stop();
         super.stop();
     }
-
-    //Far Blue
-    RobCommand gateCloseSync = new RCServoGate(this.hardware, RCServoGate.CMD_CLOSE, true);
-    RobCommand firstRowCollected = new RCRoadrunner1(drive.actionBuilder(new Pose2d(-36,24, Math.toRadians(90)))
-            .strafeToConstantHeading(new Vector2d(-36, 60))
-            .build(), hardware);
-
-//
-//    //Score Preloaded artifacts
-//            hardware.robo130.addRoadrunnerCommand(new RCOuttake(this.hardware,0.9));
-//            hardware.robo130.addCommand(new RCWait(this.hardware, 2.5)); //possibly too fast
-//            hardware.robo130.addCommand(new RCServoGate(this.hardware, RCServoGate.CMD_OPEN, true));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.5, true));
-//            hardware.robo130.addCommand(new RCWait(this.hardware, 2));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-//            hardware.robo130.addCommand(gateCloseSync);
-//            hardware.robo130.addRoadrunnerCommand(new RCRoadrunnerSync(this.hardware, gateCloseSync));
-//            hardware.robo130.addRoadrunnerCommand(new RCOuttake(this.hardware,0));
-//
-//    //Collect First Row
-//            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(-60,12, Math.toRadians(30)))
-//            .strafeToLinearHeading(new Vector2d(-36, 24), Math.toRadians(90))
-//            .build(), hardware));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
-//            hardware.robo130.addCommand(firstRowCollected);
-//            hardware.robo130.addRoadrunnerCommand(new RCRoadrunnerSync(this.hardware, firstRowCollected));
-//            hardware.robo130.addRoadrunnerCommand(new RCOuttake(this.hardware, 0.9, true));
-//
-//    //Score First Row
-//            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(-36,60, Math.toRadians(90)))
-//            .strafeToLinearHeading(new Vector2d(-60, 12), Math.toRadians(30))
-//            .build(), hardware));
-//            hardware.robo130.addCommand(new RCWait(this.hardware, 1.5)); //possibly too fast
-//            hardware.robo130.addCommand(new RCServoGate(this.hardware, RCServoGate.CMD_OPEN, true));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.5, true));
-//            hardware.robo130.addCommand(new RCWait(this.hardware, 2));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-//            hardware.robo130.addCommand(gateCloseSync);
-//            hardware.robo130.addRoadrunnerCommand(new RCRoadrunnerSync(this.hardware, gateCloseSync));
-//            hardware.robo130.addRoadrunnerCommand(new RCOuttake(this.hardware,0));
-//
-//    //Leave
-//            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(-36,24, Math.toRadians(90)))
-//            .strafeToLinearHeading(new Vector2d(-60, 12), Math.toRadians(30))
-//            .build(), hardware));
-
-//    //Far Red
-//    RobCommand gateCloseSync = new RCServoGate(this.hardware, RCServoGate.CMD_CLOSE, true);
-//    RobCommand firstRowCollected = new RCRoadrunner1(drive.actionBuilder(new Pose2d(-36,-24, Math.toRadians(-90)))
-//            .strafeToConstantHeading(new Vector2d(-36, -60))
-//            .build(), hardware);
-//
-//
-//    //Score Preloaded artifacts
-//            hardware.robo130.addRoadrunnerCommand(new RCOuttake(this.hardware,0.9));
-//            hardware.robo130.addCommand(new RCWait(this.hardware, 2.5)); //possibly too fast
-//            hardware.robo130.addCommand(new RCServoGate(this.hardware, RCServoGate.CMD_OPEN, true));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.5, true));
-//            hardware.robo130.addCommand(new RCWait(this.hardware, 2));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-//            hardware.robo130.addCommand(gateCloseSync);
-//            hardware.robo130.addRoadrunnerCommand(new RCRoadrunnerSync(this.hardware, gateCloseSync));
-//            hardware.robo130.addRoadrunnerCommand(new RCOuttake(this.hardware,0));
-//
-//    //Collect First Row
-//            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(-60,-12, Math.toRadians(-30)))
-//            .strafeToLinearHeading(new Vector2d(-36, -24), Math.toRadians(-90))
-//            .build(), hardware));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
-//            hardware.robo130.addCommand(firstRowCollected);
-//            hardware.robo130.addRoadrunnerCommand(new RCRoadrunnerSync(this.hardware, firstRowCollected));
-//            hardware.robo130.addRoadrunnerCommand(new RCOuttake(this.hardware, 0.9, true));
-//
-//    //Score First Row
-//            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(-36,-60, Math.toRadians(-90)))
-//            .strafeToLinearHeading(new Vector2d(-60, 12), Math.toRadians(-30))
-//            .build(), hardware));
-//            hardware.robo130.addCommand(new RCWait(this.hardware, 1.5)); //possibly too fast
-//            hardware.robo130.addCommand(new RCServoGate(this.hardware, RCServoGate.CMD_OPEN, true));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.5, true));
-//            hardware.robo130.addCommand(new RCWait(this.hardware, 2));
-//            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-//            hardware.robo130.addCommand(gateCloseSync);
-//            hardware.robo130.addRoadrunnerCommand(new RCRoadrunnerSync(this.hardware, gateCloseSync));
-//            hardware.robo130.addRoadrunnerCommand(new RCOuttake(this.hardware,0));
-//
-//    //Leave
-//            hardware.robo130.addCommand(new RCRoadrunner1(drive.actionBuilder(new Pose2d(-36,-24, Math.toRadians(-90)))
-//            .strafeToLinearHeading(new Vector2d(-60, -12), Math.toRadians(-30))
-//            .build(), hardware));
-
 }

@@ -31,12 +31,12 @@ public class RCServoGate extends RobCommand {
         startTime = hardware.getCurrentTime();
         switch (servoCMD) {
             case CMD_CLOSE:
-                action = hardware.servoGate.closeClawAction();
+                action = hardware.servoGate.closeGateAction();
                 action.run(hardware.packet);
                 hardware.logMessage(false, "RCSpecimenClaw", "Specimen Claw Set To close Position");
                 break;
             case CMD_OPEN:
-                action = hardware.servoGate.openClawAction();
+                action = hardware.servoGate.openGateAction();
                 action.run(hardware.packet);
                 hardware.logMessage(false, "RCSpecimenClaw", "Specimen Claw Set To open Position");
                 break;

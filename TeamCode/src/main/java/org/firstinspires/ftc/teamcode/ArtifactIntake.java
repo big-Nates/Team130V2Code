@@ -85,7 +85,12 @@ public class ArtifactIntake {
     public void setPower(double power){
         intakeMotor.setPower(power);
         innerIntakeMotor.setPower(power);
-        state = INTAKING;
+        if(power == 0){
+            state = STATIONARY;
+        }else{
+            state = INTAKING;
+        }
+
     }
 
     public void singleShoot(double power){
@@ -140,7 +145,7 @@ public class ArtifactIntake {
         };
     }
 
-    public Action setPowerAction(double power){
+    public Action  setPowerAction(double power){
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {

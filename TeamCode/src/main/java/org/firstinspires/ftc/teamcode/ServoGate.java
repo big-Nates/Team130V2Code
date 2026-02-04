@@ -14,12 +14,12 @@ public class ServoGate {
     private Servo gateServo = null;
     private Servo leftGateServo = null;
 
-    public static final double OPEN_POS = 0.2; // NEED TO BE SET
+    public static final double OPEN_POS = 0.15; // NEED TO BE SET
 
-    public static final double LEFT_OPEN_POS = 0.7; // NEED TO BE SET
+    public static final double LEFT_OPEN_POS = 0.5; // NEED TO BE SET
     public static final double CLOSE_POS = 0.6; // NEED TO BE SET
-    public static final double LEFT_CLOSE_POS = 0.25; // NEED TO BE SET
-    public boolean isOpen = true;
+    public static final double LEFT_CLOSE_POS = 0.05; // NEED TO BE SET
+    public boolean isOpen = false;
 
     public ServoGate(OpMode opMode, Hardware hardware) {
         this.opMode = opMode;
@@ -29,39 +29,43 @@ public class ServoGate {
     public void init(){
         gateServo = hardware.gateServo;
         leftGateServo = hardware.leftGateServo;
-        closeClaw();
+        closeGate();
     }
 
-    public void openClaw(){
+    public void openGate(){
         gateServo.setPosition(OPEN_POS);
         leftGateServo.setPosition(LEFT_OPEN_POS);
         isOpen = true;
     }
 
-    public void closeClaw(){
+    public void closeGate(){
         gateServo.setPosition(CLOSE_POS);
         leftGateServo.setPosition(LEFT_CLOSE_POS);
         isOpen = false;
     }
 
-    public Action openClawAction(){
+    public Action openGateAction(){
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                openClaw();
-                return false;
+                openGate();
+                if (Math.abs(hardware.gateServo.getPosition() - OPEN_POS) < 0.01) {
+                    hardware.logMessage(false, "RCServoGate", "Command Complete, at requested position");
+                    return false;
+                }
+                return true;
             }
 
         };
     }
 
-    public Action closeClawAction(){
+    public Action closeGateAction(){
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                closeClaw();
+                closeGate();
                 if (Math.abs(hardware.gateServo.getPosition() - CLOSE_POS) < 0.03) {
-                    hardware.logMessage(false, "RCSpecimenClaw", "Command Complete, at requested position");
+                    hardware.logMessage(false, "RCServoGate", "Command Complete, at requested position");
                     return false;
                 }
                 return true;
@@ -83,28 +87,6 @@ public class ServoGate {
             }
 
         };
-    }
-
-
-
-    public void toggleClaw(){
-        if(isOpen){
-            closeClaw();
-        }else{
-            openClaw();
-        }
-    }
-
-    public String getStateString(){
-        if (isOpen) {
-            return "Open";
-        } else {
-            return "Close";
-        }
-    }
-
-    public boolean getState(){
-        return isOpen;
     }
 
     public void setRightServoPosition(double position){

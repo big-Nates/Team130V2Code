@@ -37,30 +37,21 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @Config
-@TeleOp(name="Solo 25-26", group="Linear OpMode")
-public class SoloOpMode extends OpMode {
+@TeleOp(name="Solo OpMode 25-26", group="Linear OpMode")
+public class SoloOpMode2526 extends OpMode {
     private final Hardware hardware = new Hardware();
 
-    private OpMode opMode;
-
-    private static final double STRAFE_POWER = 0.50;
-    private double prevLPower = 0.0;
-    private double prevRPower = 0.0;
-
-    private final boolean isAccelDriveMode = false;
 
     private RobotConfiguration robotConfiguration = null;
 
     private boolean isRed = false;
-    private boolean isLeftStartingPos = false;
+    private boolean isFarStartingPos = false;
 
-    private final boolean isPreviousManualDrive = false;
     private final boolean isCurrentManualDrive = false;
-
-    private double startTime = 0;
     private double currentGasPedalPower = 1.0;
     private double shooterPower = 1.0;
-    private boolean reverseControls = false;
+    private int intakeState;
+    private int outtakeState;
     private Pose2d startPose = null;
 
 
@@ -76,24 +67,30 @@ public class SoloOpMode extends OpMode {
 
         hardware.init(hardwareMap, this);
 
-        hardware.drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
+
+
+
 
         robotConfiguration = new RobotConfiguration();
         robotConfiguration.readConfig();
         isRed = robotConfiguration.isRed;
-        isLeftStartingPos = robotConfiguration.isFarStartPos;
+        isFarStartingPos = robotConfiguration.isFarStartPos;
 
-        double startingAngle = 90;
+        if(!isFarStartingPos && !isRed){
+            //Close Blue
+            startPose = new Pose2d(-5,24, Math.toRadians(90));
+        }
+        else if(!isFarStartingPos){
+            //Close Red
+            startPose = new Pose2d(-5,-24, Math.toRadians(90));
+        }
 
-        startPose = new Pose2d(0,0,Math.toRadians(0));
+        hardware.drive = new MecanumDrive(hardwareMap, startPose);
         telemetry.addLine("Configuration Fetched");
-//        hardware.drive.setPoseEstimate(startPose);
-//        hardware.odom.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 90));
-//        telemetry.addData("Is Red?? ", isRed);
-//        telemetry.addData("Is Left Position? ", isLeftStartingPos);
+        intakeState = hardware.artifactIntake.getState();
+        outtakeState = hardware.shooter.getState();
         telemetry.update();
 
-//        startPose = new Pose2d(0, 0);
     }
 
     @Override
@@ -108,19 +105,23 @@ public class SoloOpMode extends OpMode {
 
     @Override
     public void loop() {
-        double targetLPower = 0.0;
-        double targetRPower = 0.0;
-
         hardware.updateValues();
-
         Pose2d poseEstimate = hardware.drive.localizer.getPose();
 
         //GAMEPAD_1
         //Gas Pedal
-        if (hardware.gamepad1_current_right_trigger < 0.05) {
+        if (hardware.gamepad1_current_left_trigger < 0.05 && hardware.gamepad1_current_right_trigger < 0.05) {
             currentGasPedalPower = 1.0;
+        } else if (hardware.gamepad1_current_left_trigger > 0.5) {
+            currentGasPedalPower = (Math.max(1.0 - hardware.gamepad1_current_left_trigger, 0.3));
         } else if (hardware.gamepad1_current_right_trigger > 0.5) {
             currentGasPedalPower = (Math.max(1.0 - hardware.gamepad1_current_right_trigger, 0.6));
+        }
+
+        if(hardware.gamepad1_current_a && !hardware.gamepad1_previous_a){
+            hardware.robo130.addCommand(new RCRoadrunner1(this.hardware.drive.actionBuilder(hardware.drive.localizer.getPose())
+                    .strafeToConstantHeading(new Vector2d(0, 0))
+                    .build(), hardware));
         }
 
         hardware.drive.setDrivePowers(new PoseVelocity2d(
@@ -131,76 +132,55 @@ public class SoloOpMode extends OpMode {
                 -gamepad1.right_stick_x * currentGasPedalPower
         ));
 
-        if(hardware.gamepad1_current_left_bumper){
-            hardware.artifactIntake.setPower(1);
-        }else if(hardware.gamepad1_current_dpad_down){
-            hardware.artifactIntake.setPower(-0.75);
-        }
-        else if(hardware.artifactIntake.getState() == ArtifactIntake.INTAKING){
-            hardware.artifactIntake.noRotation();
-        }
-
-        if(hardware.gamepad2_current_right_bumper){
-            hardware.shooter.setPower(shooterPower);
-        }else{
-            hardware.shooter.stop();
-        }
-
-        if(hardware.gamepad1_current_dpad_right && !hardware.gamepad1_previous_dpad_right){
-            shooterPower = 0.25;
-        }
-
-        if(hardware.gamepad1_current_dpad_up && !hardware.gamepad1_previous_dpad_up){
-            shooterPower = 0.5;
-        }
-
-        if(hardware.gamepad1_current_dpad_left && !hardware.gamepad1_previous_dpad_left){
-            shooterPower = 0.75;
-        }
-
-        if(hardware.gamepad1_current_dpad_down && !hardware.gamepad1_previous_dpad_down){
-            shooterPower = 1.0;
-        }
-
-        if(hardware.gamepad1_current_a && !hardware.gamepad1_previous_a){
-            shooterPower = -1;
-        }
-
-        if(hardware.gamepad2_current_x && !hardware.gamepad2_previous_x){
-            if(hardware.servoGate.isOpen){
-                hardware.servoGate.closeClaw();
-
+        if(hardware.gamepad1_current_right_bumper && !hardware.gamepad1_previous_right_bumper){
+            if(hardware.shooter.getState() == Shooter.INACTIVEOUTTAKE){
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, 0.9));
             }else{
-                hardware.servoGate.openClaw();
-
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, 0));
             }
         }
 
+        if(hardware.gamepad1_current_left_bumper && !hardware.gamepad1_previous_left_bumper){
+            if(hardware.artifactIntake.getState() == ArtifactIntake.STATIONARY){
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+            }else{
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, 0.9));
+            }
+        }
+
+        if(hardware.gamepad1_current_x && !hardware.gamepad1_previous_x){
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+            hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_OPEN,false));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.5, true));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.75));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.75));
+            hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_CLOSE,false));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+            hardware.robo130.addCommand(new RCOuttake(this.hardware, 0, true));
+        }
+
+        if(hardware.gamepad1_current_b && !hardware.gamepad1_previous_b){
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, -0.5, true));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+        }
+
+
+
+
+
         hardware.robo130.processCommands();
-
         hardware.loop();
-
-        prevLPower = targetLPower;
-        prevRPower = targetRPower;
-
-//        telemetry.addData("Front Distance", hardware.frontDistance.getDistance(DistanceUnit.INCH));
-//        telemetry.addData("Rear Distance", hardware.rearDistance.getDistance(DistanceUnit.INCH));
-        telemetry.addData("Delta Time", hardware.getDeltaTime());
-        telemetry.addData("Robot Command Stack: ", Integer.toString(hardware.robo130.robotCommandStack.getNumCommands())
-                + " " + Integer.toString(hardware.robo130.robotCommandStack.getCurrentCommandIndex())
-                + " " + Integer.toString(hardware.robo130.robotCommandStack.getNextCommandIndex()));
-        telemetry.addData("Is Open?", hardware.servoGate.isOpen);
-//        telemetry.addData("Roadrunner Command Stack: ", Integer.toString(hardware.robo130.roadrunnerCommandStack.getNumCommands())
-//                + " " + Integer.toString(hardware.robo130.roadrunnerCommandStack.getCurrentCommandIndex())
-//                + " " + Integer.toString(hardware.robo130.roadrunnerCommandStack.getNextCommandIndex()));
+        telemetry.addData("Robot Command Stack: ", (hardware.robo130.robotCommandStack.getNumCommands()
+                + " " + hardware.robo130.robotCommandStack.getCurrentCommandIndex()));
+        telemetry.addData("Intake State", hardware.artifactIntake.getState());
         telemetry.addData("Status", "Running");
         telemetry.addData("Shooting power", shooterPower);
-
-//        telemetry.addData("X position: ", hardware.odom.getPosX() / 25.4);
-//        telemetry.addData("Y position: ", hardware.odom.getPosY() / 25.4);
-//        telemetry.addData("Heading: ", hardware.odom.getHeading());
-//        telemetry.addData("Intake state: ", hardware.sampleIntake.getStateString());
-//        telemetry.addData("Specimen state: ", hardware.specimenClaw.getStateString());
+        telemetry.addData("Current Position", ("X: "+poseEstimate.position.y+" Y: "+poseEstimate.position.x+" Heading: "+poseEstimate.heading.toDouble()));
         telemetry.update();
     }
 

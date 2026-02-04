@@ -60,6 +60,8 @@ public class OpMode2526 extends OpMode {
     private double startTime = 0;
     private double currentGasPedalPower = 1.0;
     private double shooterPower = 1.0;
+
+    private boolean manualControls;
     private boolean reverseControls = false;
     private Pose2d startPose = null;
 
@@ -82,6 +84,7 @@ public class OpMode2526 extends OpMode {
         robotConfiguration.readConfig();
         isRed = robotConfiguration.isRed;
         isLeftStartingPos = robotConfiguration.isFarStartPos;
+        manualControls = false;
 
         double startingAngle = 90;
 
@@ -147,54 +150,99 @@ public class OpMode2526 extends OpMode {
                 -gamepad1.right_stick_x * currentGasPedalPower
         ));
 
-        if(hardware.gamepad2_current_right_trigger > 0.05){
-            hardware.artifactIntake.setPower(1);
-        }else if(hardware.gamepad2_current_right_bumper){
-            hardware.artifactIntake.setPower(-0.75);
-        }else if(hardware.gamepad2_current_y && !hardware.gamepad2_previous_y){
-            hardware.artifactIntake.singleShoot(0.9);
-        }
-        else if(hardware.artifactIntake.getState() == ArtifactIntake.INTAKING){
-            hardware.artifactIntake.noRotation();
+        if(hardware.gamepad2_current_y && !hardware.gamepad2_previous_y){
+            manualControls = !manualControls;
         }
 
-        if(hardware.gamepad2_current_left_trigger > 0.05){
-            hardware.shooter.setPower(shooterPower);
-        }else{
-            hardware.shooter.stop();
-        }
-        //0.7 1st 0.45 2nd
-        if(hardware.gamepad2_current_b && !hardware.gamepad2_previous_b){
-            hardware.shooter.setPower(0.7);
-        }
-        if(hardware.gamepad2_current_a && !hardware.gamepad2_previous_a){
-            hardware.shooter.setPower(0.45);
-        }
+        //Manual Controls
+        if(manualControls){
+            if (hardware.gamepad2_current_right_trigger > 0.05) {
+                hardware.artifactIntake.setPower(1);
+            } else if (hardware.gamepad2_current_right_bumper) {
+                hardware.artifactIntake.setPower(-0.75);
+            } else if (hardware.gamepad2_current_y && !hardware.gamepad2_previous_y) {
+                hardware.artifactIntake.singleShoot(0.9);
+            } else if (hardware.artifactIntake.getState() == ArtifactIntake.INTAKING) {
+                hardware.artifactIntake.noRotation();
+            }
 
-        if(hardware.gamepad2_current_dpad_up && !hardware.gamepad2_previous_dpad_up){
-            if(shooterPower < 1){
-                shooterPower += 0.1;
+            if (hardware.gamepad2_current_left_trigger > 0.05) {
+                hardware.shooter.setPower(shooterPower);
+            } else {
+                hardware.shooter.stop();
+            }
+            //0.7 1st 0.45 2nd
+            if (hardware.gamepad2_current_b && !hardware.gamepad2_previous_b) {
+                hardware.shooter.setPower(0.7);
+            }
+            if (hardware.gamepad2_current_a && !hardware.gamepad2_previous_a) {
+                hardware.shooter.setPower(0.45);
+            }
+
+            if (hardware.gamepad2_current_dpad_up && !hardware.gamepad2_previous_dpad_up) {
+                if (shooterPower < 1) {
+                    shooterPower += 0.1;
+                }
+            }
+
+            if (hardware.gamepad2_current_dpad_right && !hardware.gamepad2_previous_dpad_right) {
+                if (shooterPower < 1) {
+                    shooterPower += 0.05;
+                }
+            }
+
+            if (hardware.gamepad2_current_dpad_down && !hardware.gamepad2_previous_dpad_down) {
+                if (shooterPower > 0) {
+                    shooterPower -= 0.1;
+                }
+            }
+
+            if (hardware.gamepad2_current_x && !hardware.gamepad2_previous_x) {
+                if (hardware.servoGate.isOpen) {
+                    hardware.servoGate.closeGate();
+                } else {
+                    hardware.servoGate.openGate();
+
+                }
             }
         }
 
-        if(hardware.gamepad2_current_dpad_right && !hardware.gamepad2_previous_dpad_right){
-            if(shooterPower < 1){
-                shooterPower += 0.05;
+        if (!manualControls){
+            if(hardware.gamepad2_current_right_bumper && !hardware.gamepad2_previous_right_bumper){
+                if(hardware.shooter.getState() == Shooter.INACTIVEOUTTAKE){
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 0.9));
+                }else{
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 0));
+                }
             }
-        }
 
-        if(hardware.gamepad2_current_dpad_down && !hardware.gamepad2_previous_dpad_down){
-            if(shooterPower > 0){
-                shooterPower -= 0.1;
+            if(hardware.gamepad2_current_left_bumper && !hardware.gamepad2_previous_left_bumper){
+                if(hardware.artifactIntake.getState() == ArtifactIntake.STATIONARY){
+                    hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+                }else{
+                    hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 0.9));
+                }
             }
-        }
 
-        if(hardware.gamepad2_current_x && !hardware.gamepad2_previous_x){
-            if(hardware.servoGate.isOpen){
-                hardware.servoGate.closeClaw();
-            }else{
-                hardware.servoGate.openClaw();
+            if(hardware.gamepad2_current_x && !hardware.gamepad2_previous_x){
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_OPEN,false));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.5, true));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.75));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.75));
+                hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_CLOSE,false));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, 0, true));
+            }
 
+            if(hardware.gamepad2_current_b && !hardware.gamepad2_previous_b){
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, -0.5, true));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
             }
         }
 
@@ -216,6 +264,7 @@ public class OpMode2526 extends OpMode {
 //                + " " + Integer.toString(hardware.robo130.roadrunnerCommandStack.getNextCommandIndex()));
         telemetry.addData("Status", "Running");
         telemetry.addData("Shooting power", shooterPower);
+        telemetry.addData("In Manual Mode?", manualControls);
 
 //        telemetry.addData("X position: ", hardware.odom.getPosX() / 25.4);
 //        telemetry.addData("Y position: ", hardware.odom.getPosY() / 25.4);

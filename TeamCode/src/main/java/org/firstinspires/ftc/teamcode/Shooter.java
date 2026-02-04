@@ -44,7 +44,22 @@ public class Shooter {
     public void setPower(double power) {
         shooterFlyWheel.setPower(power);
         this.shootingPower = power;
-        state = ACTIVEOUTTAKE;
+        if(power == 0){
+            state = INACTIVEOUTTAKE;
+        }else{
+            state = ACTIVEOUTTAKE;
+        }
+
+    }
+
+    public void setVelocity(int velocity){
+        shooterFlyWheel.setVelocity(velocity);
+        this.shootingPower = velocity;
+        if(velocity == 0){
+            state = INACTIVEOUTTAKE;
+        }else{
+            state = ACTIVEOUTTAKE;
+        }
     }
 
     public Action setPowerAction(double targetPower){
@@ -52,7 +67,18 @@ public class Shooter {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 setPower(targetPower);
-                return true;
+                return false;
+            }
+
+        };
+    }
+
+    public Action setVelocityAction(int velocity){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                setVelocity(velocity);
+                return false;
             }
 
         };
@@ -62,5 +88,9 @@ public class Shooter {
         shooterFlyWheel.setPower(0.0);
         shooterFlyWheel.setVelocity(0.0);
         state = INACTIVEOUTTAKE;
+    }
+
+    public int getState(){
+        return state;
     }
 }

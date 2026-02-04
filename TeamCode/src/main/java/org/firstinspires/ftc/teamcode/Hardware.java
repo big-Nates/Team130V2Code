@@ -356,6 +356,7 @@ public class Hardware {
 
     public void loop() {
         artifactIntake.doLoop();
+        drive.updatePoseEstimate();
         logCSVData();
 //        drive.update();
 //        robo130.doLoop();
