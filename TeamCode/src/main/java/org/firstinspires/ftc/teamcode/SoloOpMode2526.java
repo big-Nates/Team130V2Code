@@ -67,10 +67,6 @@ public class SoloOpMode2526 extends OpMode {
 
         hardware.init(hardwareMap, this);
 
-
-
-
-
         robotConfiguration = new RobotConfiguration();
         robotConfiguration.readConfig();
         isRed = robotConfiguration.isRed;
@@ -152,6 +148,7 @@ public class SoloOpMode2526 extends OpMode {
         if(hardware.gamepad1_current_x && !hardware.gamepad1_previous_x){
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
             hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_OPEN,false));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.75));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.5, true));
             hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));

@@ -192,7 +192,7 @@ public class OpMode2526 extends OpMode {
             }
 
             if (hardware.gamepad2_current_dpad_down && !hardware.gamepad2_previous_dpad_down) {
-                if (shooterPower > 0) {
+                if (shooterPower-0.1 >= 0) {
                     shooterPower -= 0.1;
                 }
             }
