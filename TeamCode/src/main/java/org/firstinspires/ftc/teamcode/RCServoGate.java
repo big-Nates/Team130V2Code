@@ -10,7 +10,9 @@ public class RCServoGate extends RobCommand {
     private int servoCMD = 0;
     private boolean skipWait = false;
     private Action action;
-    private double position;
+
+    private double leftPosition;
+    private double rightPosition;
 
     private double startTime = 0.0;
 
@@ -20,34 +22,29 @@ public class RCServoGate extends RobCommand {
         this.skipWait = skipWait;
     }
 
-    public RCServoGate(Hardware hardware, int servoCMD, boolean skipWait, double position) {
+    public RCServoGate(Hardware hardware, double leftPosition, double rightPosition) {
         this.hardware = hardware;
-        this.servoCMD = servoCMD;
-        this.skipWait = skipWait;
-        this.position = position;
+        this.leftPosition = leftPosition;
+        this.rightPosition = rightPosition;
     }
 
     public void run() {
         startTime = hardware.getCurrentTime();
-        switch (servoCMD) {
-            case CMD_CLOSE:
-                action = hardware.servoGate.closeGateAction();
-                action.run(hardware.packet);
-                hardware.logMessage(false, "RCSpecimenClaw", "Specimen Claw Set To close Position");
-                break;
-            case CMD_OPEN:
-                action = hardware.servoGate.openGateAction();
-                action.run(hardware.packet);
-                hardware.logMessage(false, "RCSpecimenClaw", "Specimen Claw Set To open Position");
-                break;
-            case CMD_CUSTOM:
-                action = hardware.servoGate.setClawPositionAction(position);
-                action.run(hardware.packet);
-                hardware.logMessage(false, "RCSpecimenClaw", "Specimen Claw Set To open Position");
-                break;
-
+        if(servoCMD == CMD_CLOSE){
+            action = hardware.servoGate.closeGateAction();
+            action.run(hardware.packet);
+            hardware.logMessage(false, "RCSpecimenClaw", "Specimen Claw Set To close Position");
+        }else if(servoCMD == CMD_OPEN){
+            action = hardware.servoGate.openGateAction();
+            action.run(hardware.packet);
+            hardware.logMessage(false, "RCSpecimenClaw", "Specimen Claw Set To open Position");
+        }else{
+            action = hardware.servoGate.setClawPositionAction(leftPosition, rightPosition);
+            action.run(hardware.packet);
+            hardware.logMessage(false, "RCSpecimenClaw", "Specimen Claw Set To open Position");
         }
     }
+
 
     public boolean isComplete() {
         if (skipWait) {

@@ -23,12 +23,12 @@ public class RCArtifactIntake extends RobCommand {
 
     private double delayTime = 0.0;
     private double startTime = 0.0;
+    private int num = 0;
 
-    public RCArtifactIntake(Hardware hardware, int intakeCMD, boolean isIntakeDirection, boolean skipWait) {
+    public RCArtifactIntake(Hardware hardware, double power , int num) {
         this.hardware = hardware;
-        this.intakeCMD = intakeCMD;
-        this.isIntakeDirection = isIntakeDirection;
-        this.skipWait = skipWait;
+        this.power = power;
+        this.num = num;
     }
 
     public RCArtifactIntake(Hardware hardware, double power, boolean skipWait) {
@@ -38,46 +38,18 @@ public class RCArtifactIntake extends RobCommand {
     }
 
     public void run() {
-        switch (intakeCMD) {
-            case CMD_OFF:
-                action = hardware.artifactIntake.noRotationAction();
-                action.run(hardware.packet);
-                hardware.logMessage(false, "RCSampleIntake", "Intake Set To Off");
-                break;
-            case CMD_ON:
-                if(isIntakeDirection){
-                    action = hardware.artifactIntake.intakeAction();
-                    action.run(hardware.packet);
-                    hardware.logMessage(false, "RCSampleIntake", "Intake Set To Intaking");
-                    break;
-                }else{
-                    action = hardware.artifactIntake.outtakeAction();
-                    action.run(hardware.packet);
-                    hardware.logMessage(false, "RCSampleIntake", "Intake Set To Outtaking");
-                    break;
-                }
-            case CMD_TOGGLE_POWER:
-                switch(hardware.artifactIntake.getState()){
-                    case ArtifactIntake.INTAKING:
-                    case ArtifactIntake.OUTTAKING:
-                    case ArtifactIntake.STATIONARY:
-                        if(isIntakeDirection){
-                            action = hardware.artifactIntake.intakeAction();
-                            action.run(hardware.packet);
-                            hardware.logMessage(false, "RCSampleIntake", "Intake Set To Intaking");
-                        }else{
-                            action = hardware.artifactIntake.outtakeAction();
-                            action.run(hardware.packet);
-                            hardware.logMessage(false, "RCSampleIntake", "Intake Set To Outtaking");
-                        }
-                        break;
-                }
-                break;
-            case CMD_CUSTOM_POWER:
-                action = hardware.artifactIntake.setPowerAction(power);
-                action.run(hardware.packet);
-                hardware.logMessage(false, "RCSampleIntake", "Intake Set To " + power + " Power");
+        if(num == 1){
+            action = hardware.artifactIntake.setOuterPowerAction(power);
+            action.run(hardware.packet);
+        }else if(num == 2){
+            action = hardware.artifactIntake.setInnerPowerAction(power);
+            action.run(hardware.packet);
+        }else{
+            action = hardware.artifactIntake.setPowerAction(power);
+            action.run(hardware.packet);
         }
+
+        hardware.logMessage(false, "RCSampleIntake", "Intake Set To " + power + " Power");
     }
 
     public boolean isComplete() {

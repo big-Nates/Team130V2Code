@@ -208,9 +208,18 @@ public class OpMode2526 extends OpMode {
         }
 
         if (!manualControls){
+            if(hardware.gamepad2_current_left_bumper && !hardware.gamepad2_previous_left_bumper){
+                if(hardware.artifactIntake.getState() == ArtifactIntake.STATIONARY){
+                    hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+                }else{
+                    hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 1, true));
+                }
+            }
+
             if(hardware.gamepad2_current_right_bumper && !hardware.gamepad2_previous_right_bumper){
                 if(hardware.shooter.getState() == Shooter.INACTIVEOUTTAKE){
-                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 0.9));
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 1, true));
                 }else{
                     hardware.robo130.addCommand(new RCOuttake(this.hardware, 0));
                 }
@@ -221,7 +230,7 @@ public class OpMode2526 extends OpMode {
                     hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
                 }else{
                     hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 0.9));
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 1, true));
                 }
             }
 

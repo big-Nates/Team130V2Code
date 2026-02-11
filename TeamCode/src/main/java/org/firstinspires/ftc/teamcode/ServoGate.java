@@ -17,8 +17,8 @@ public class ServoGate {
     public static final double OPEN_POS = 0.15; // NEED TO BE SET
 
     public static final double LEFT_OPEN_POS = 0.5; // NEED TO BE SET
-    public static final double CLOSE_POS = 0.6; // NEED TO BE SET
-    public static final double LEFT_CLOSE_POS = 0.05; // NEED TO BE SET
+    public static final double CLOSE_POS = 0.5; // NEED TO BE SET
+    public static final double LEFT_CLOSE_POS = 0.1; // NEED TO BE SET
     public boolean isOpen = false;
 
     public ServoGate(OpMode opMode, Hardware hardware) {
@@ -29,7 +29,8 @@ public class ServoGate {
     public void init(){
         gateServo = hardware.gateServo;
         leftGateServo = hardware.leftGateServo;
-        closeGate();
+        setLeftServoPosition(0.1);
+        setRightServoPosition(0.5);
     }
 
     public void openGate(){
@@ -74,16 +75,13 @@ public class ServoGate {
         };
     }
 
-    public Action setClawPositionAction(double position){
+    public Action setClawPositionAction(double leftPosition, double rightPosition){
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                setRightServoPosition(position);
-                if (Math.abs(hardware.gateServo.getPosition() - position) < 0.03) {
-                    hardware.logMessage(false, "RCSpecimenClaw", "Command Complete, at requested position");
-                    return false;
-                }
-                return true;
+                setLeftServoPosition(leftPosition);
+                setRightServoPosition(rightPosition);
+                return false;
             }
 
         };

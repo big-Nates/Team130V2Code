@@ -93,6 +93,20 @@ public class ArtifactIntake {
 
     }
 
+    public void setInnerPower(double power){
+        innerIntakeMotor.setPower(power);
+        if(power != 0){
+            state = INTAKING;
+        }
+    }
+
+    public void setOuterPower(double power){
+        intakeMotor.setPower(power);
+        if(power != 0){
+            state = INTAKING;
+        }
+    }
+
     public void singleShoot(double power){
         startTime = opMode.time;
         intakeMotor.setPower(power);
@@ -112,44 +126,35 @@ public class ArtifactIntake {
         state = STATIONARY;
     }
 
-    public Action intakeAction(){
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                intakeRotation();
-                return false;
-            }
-
-        };
-    }
-
-    public Action outtakeAction(){
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                outtakeAction();
-                return false;
-            }
-
-        };
-    }
-
-    public Action noRotationAction(){
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                noRotation();
-                return false;
-            }
-
-        };
-    }
-
-    public Action  setPowerAction(double power){
+    public Action setPowerAction(double power){
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 setPower(power);
+                return false;
+
+            }
+
+        };
+    }
+
+    public Action setInnerPowerAction(double power){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                setInnerPower(power);
+                return false;
+
+            }
+
+        };
+    }
+
+    public Action setOuterPowerAction(double power){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                setOuterPower(power);
                 return false;
 
             }
