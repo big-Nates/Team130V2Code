@@ -15,8 +15,8 @@ public class ShooterTest extends OpMode {
 
     private DcMotorEx outtakeMotor;
 
-    private int currentVelocity = 0;
-    private int velocityIncrement = 10;
+    private double currentVelocity = 0;
+    private double velocityIncrement = 10;
 
 
 
@@ -67,26 +67,33 @@ public class ShooterTest extends OpMode {
         hardware.updateValues();
 
         if (hardware.gamepad1_current_x) {
-            velocityIncrement = 10;
+            velocityIncrement = 0.01;
         }
         if (hardware.gamepad1_current_y) {
-            velocityIncrement = 100;
+            velocityIncrement = 0.1;
         }
         if (hardware.gamepad1_current_b) {
-            velocityIncrement = 1000;
-        }
-        if(hardware.gamepad1_current_right_trigger > 0.05){
-            hardware.artifactIntake.setPower(1);
+            velocityIncrement = 1;
         }
 
+
         if (hardware.gamepad1_current_dpad_up & !hardware.gamepad1_previous_dpad_up) {
-            currentVelocity = Math.min(Math.max((currentVelocity + velocityIncrement), 0), 10000);
+            currentVelocity = Math.min(Math.max((currentVelocity + velocityIncrement), 0), 10);
         } else if (hardware.gamepad1_current_dpad_down & !hardware.gamepad1_previous_dpad_down) {
-            currentVelocity = Math.min(Math.max((currentVelocity - velocityIncrement), 0), 10000);
+            currentVelocity = Math.min(Math.max((currentVelocity - velocityIncrement), 0), 10);
         }
 
 
         outtakeMotor.setVelocity(currentVelocity);
+
+        if(hardware.gamepad1_current_left_trigger > 0.05){
+            hardware.artifactIntake.setPower(1);
+        }
+        if(hardware.gamepad1_current_right_trigger > 0.05){
+            hardware.shooter.setVelocity(currentVelocity);
+        }else{
+            hardware.shooter.setPower(0);
+        }
 
         hardware.loop();
 

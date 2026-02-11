@@ -237,12 +237,13 @@ public class OpMode2526 extends OpMode {
             if(hardware.gamepad2_current_x && !hardware.gamepad2_previous_x){
                 hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
                 hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_OPEN,false));
-                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.5, true));
-                hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
-                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-                hardware.robo130.addCommand(new RCWait(this.hardware, 0.75));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
                 hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
-                hardware.robo130.addCommand(new RCWait(this.hardware, 0.75));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.15));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 1));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
                 hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_CLOSE,false));
                 hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
                 hardware.robo130.addCommand(new RCOuttake(this.hardware, 0, true));

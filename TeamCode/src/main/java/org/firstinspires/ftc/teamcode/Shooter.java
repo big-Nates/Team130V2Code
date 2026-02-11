@@ -52,7 +52,7 @@ public class Shooter {
 
     }
 
-    public void setVelocity(int velocity){
+    public void setVelocity(double velocity){
         shooterFlyWheel.setVelocity(velocity);
         this.shootingPower = velocity;
         if(velocity == 0){
