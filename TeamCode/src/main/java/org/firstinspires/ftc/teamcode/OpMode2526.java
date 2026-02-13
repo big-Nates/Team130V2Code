@@ -221,7 +221,7 @@ public class OpMode2526 extends OpMode {
                 if(hardware.shooter.getState() == Shooter.INACTIVEOUTTAKE){
                     hardware.robo130.addCommand(new RCOuttake(this.hardware, 1, true));
                 }else{
-                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 0));
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 0.0));
                 }
             }
 
