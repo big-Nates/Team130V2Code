@@ -115,9 +115,7 @@ public class SoloOpMode2526 extends OpMode {
         }
 
         if(hardware.gamepad1_current_a && !hardware.gamepad1_previous_a){
-            hardware.robo130.addCommand(new RCRoadrunner1(this.hardware.drive.actionBuilder(hardware.drive.localizer.getPose())
-                    .strafeToConstantHeading(new Vector2d(0, 0))
-                    .build(), hardware));
+            hardware.robo130.cancelStacks();
         }
 
         hardware.drive.setDrivePowers(new PoseVelocity2d(
@@ -130,9 +128,9 @@ public class SoloOpMode2526 extends OpMode {
 
         if(hardware.gamepad1_current_right_bumper && !hardware.gamepad1_previous_right_bumper){
             if(hardware.shooter.getState() == Shooter.INACTIVEOUTTAKE){
-                hardware.robo130.addCommand(new RCOuttake(this.hardware, 1.0));
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, shooterPower, true));
             }else{
-                hardware.robo130.addCommand(new RCOuttake(this.hardware, 0));
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, 0.0, true));
             }
         }
 
@@ -142,23 +140,64 @@ public class SoloOpMode2526 extends OpMode {
                 hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0.75, 2));
             }else{
                 hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-                hardware.robo130.addCommand(new RCOuttake(this.hardware, 1.0));
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, shooterPower, true));
             }
         }
 
-        if(hardware.gamepad1_current_x && !hardware.gamepad1_previous_x){
+        if (hardware.gamepad1_current_dpad_up && !hardware.gamepad1_previous_dpad_up) {
+            if (shooterPower+0.1 <= 1) {
+                shooterPower += 0.1;
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, shooterPower, true));
+            }
+        }
+
+        if (hardware.gamepad1_current_dpad_right && !hardware.gamepad1_previous_dpad_right) {
+            if (shooterPower+0.05 <= 1) {
+                shooterPower += 0.05;
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, shooterPower, true));
+            }
+        }
+
+        if (hardware.gamepad1_current_dpad_down && !hardware.gamepad1_previous_dpad_down) {
+            if (shooterPower-0.1 >= 0) {
+                shooterPower -= 0.1;
+                hardware.robo130.addCommand(new RCOuttake(this.hardware, shooterPower));
+            }
+        }
+
+        if(hardware.gamepad1_current_x && !hardware.gamepad1_previous_x && hardware.shooter.getState() == Shooter.ACTIVEOUTTAKE){
+            hardware.robo130.addRoadrunnerCommand(new RCArtifactIntake(this.hardware, -0.1, true));
+            hardware.robo130.addRoadrunnerCommand(new RCWait(this.hardware, 0.15));
+            hardware.robo130.addRoadrunnerCommand(new RCArtifactIntake(this.hardware, 0, true));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
             hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_OPEN,false));
             hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
             hardware.robo130.addCommand(new RCWait(this.hardware, 0.15));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-            hardware.robo130.addCommand(new RCWait(this.hardware, 1));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.75));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
             hardware.robo130.addCommand(new RCWait(this.hardware, 0.5));
             hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_CLOSE,false));
             hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
             hardware.robo130.addCommand(new RCOuttake(this.hardware, 0, true));
+        }
+
+        if(hardware.gamepad1_current_y && !hardware.gamepad1_previous_y && hardware.shooter.getState() == Shooter.ACTIVEOUTTAKE){
+            hardware.robo130.addRoadrunnerCommand(new RCArtifactIntake(this.hardware, -0.1, true));
+            hardware.robo130.addRoadrunnerCommand(new RCWait(this.hardware, 0.15));
+            hardware.robo130.addRoadrunnerCommand(new RCArtifactIntake(this.hardware, 0, true));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+            hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_OPEN,false));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.15));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+            hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_CLOSE,false));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+            hardware.robo130.addCommand(new RCWait(this.hardware, 0.15));
+            hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
         }
 
         if(hardware.gamepad1_current_b && !hardware.gamepad1_previous_b){
@@ -168,9 +207,6 @@ public class SoloOpMode2526 extends OpMode {
         }
 
 
-
-
-
         hardware.robo130.processCommands();
         hardware.loop();
         telemetry.addData("Robot Command Stack: ", (hardware.robo130.robotCommandStack.getNumCommands()
@@ -178,6 +214,7 @@ public class SoloOpMode2526 extends OpMode {
         telemetry.addData("Intake State", hardware.artifactIntake.getState());
         telemetry.addData("Status", "Running");
         telemetry.addData("Shooting power", shooterPower);
+        telemetry.addData("Current Velocity", "%.2f", hardware.shooterFlyWheel.getVelocity());
         telemetry.addData("Current Position", ("X: "+poseEstimate.position.y+" Y: "+poseEstimate.position.x+" Heading: "+poseEstimate.heading.toDouble()));
         telemetry.update();
     }

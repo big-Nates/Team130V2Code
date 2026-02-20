@@ -5,8 +5,8 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Shooter {
@@ -33,10 +33,9 @@ public class Shooter {
 
     public void init() {
         opMode.telemetry.addData("Shooter Status", "Initializing");
-        shooterFlyWheel = hardware.shooterFlyWhell;
+        shooterFlyWheel = hardware.shooterFlyWheel;
         runtime.reset();
         timeout.reset();
-
         state = INACTIVEOUTTAKE;
         opMode.telemetry.update();
     }
@@ -86,7 +85,7 @@ public class Shooter {
 
     public void stop() {
         shooterFlyWheel.setPower(0.0);
-        shooterFlyWheel.setVelocity(0.0);
+        shooterFlyWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         state = INACTIVEOUTTAKE;
     }
 

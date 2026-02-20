@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "Outtake Test", group = "tests")
@@ -13,10 +12,8 @@ public class ShooterTest extends OpMode {
     private final ElapsedTime runtime = new ElapsedTime();
     private final Hardware hardware = new Hardware();
 
-    private DcMotorEx outtakeMotor;
-
     private double currentVelocity = 0;
-    private double velocityIncrement = 10;
+    private double velocityIncrement = 0.1;
 
 
 
@@ -28,7 +25,7 @@ public class ShooterTest extends OpMode {
         telemetry.addData("Status", "Initializing");
         hardware.init(hardwareMap, this);
 
-        outtakeMotor = hardware.shooterFlyWhell;
+        DcMotorEx outtakeMotor = hardware.shooterFlyWheel;
 
         telemetry.addData("Specimen Claw Servo Position", currentVelocity);
         telemetry.addData("Status", "Initialized");
@@ -73,33 +70,34 @@ public class ShooterTest extends OpMode {
             velocityIncrement = 0.1;
         }
         if (hardware.gamepad1_current_b) {
-            velocityIncrement = 1;
+            velocityIncrement = 0.5;
         }
 
 
         if (hardware.gamepad1_current_dpad_up & !hardware.gamepad1_previous_dpad_up) {
-            currentVelocity = Math.min(Math.max((currentVelocity + velocityIncrement), 0), 10);
+            currentVelocity = Math.min(Math.max((currentVelocity + velocityIncrement), 0), 1);
         } else if (hardware.gamepad1_current_dpad_down & !hardware.gamepad1_previous_dpad_down) {
-            currentVelocity = Math.min(Math.max((currentVelocity - velocityIncrement), 0), 10);
+            currentVelocity = Math.min(Math.max((currentVelocity - velocityIncrement), 0), 1);
         }
 
 
-        outtakeMotor.setVelocity(currentVelocity);
+
 
         if(hardware.gamepad1_current_left_trigger > 0.05){
             hardware.artifactIntake.setPower(1);
         }
-        if(hardware.gamepad1_current_right_trigger > 0.05){
-            hardware.shooter.setVelocity(currentVelocity);
-        }else{
+        if(hardware.gamepad1_current_right_bumper && !hardware.gamepad1_previous_right_bumper){
+            hardware.shooter.setPower(currentVelocity);
+        }else if(hardware.gamepad1_current_left_bumper && !hardware.gamepad1_previous_left_bumper){
             hardware.shooter.setPower(0);
         }
 
         hardware.loop();
 
         telemetry.addData("Status", "Run Time: " + runtime);
-        telemetry.addData("Current velocity", currentVelocity);
-        telemetry.addData("Velocity Increment", velocityIncrement);
+        telemetry.addData("Current power", currentVelocity);
+        telemetry.addData("Power Increment", velocityIncrement);
+        telemetry.addData("Current Velocity", "%.2f", hardware.shooterFlyWheel.getVelocity());
         telemetry.update();
     }
 

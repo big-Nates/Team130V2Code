@@ -138,7 +138,7 @@ public class OpMode2526 extends OpMode {
         //Gas Pedal
         if (hardware.gamepad1_current_right_trigger < 0.05) {
             currentGasPedalPower = 1.0;
-        } else if (hardware.gamepad1_current_right_trigger > 0.5) {
+        } else if (hardware.gamepad1_current_right_trigger > 0.05) {
             currentGasPedalPower = (Math.max(1.0 - hardware.gamepad1_current_right_trigger, 0.6));
         }
 
@@ -150,9 +150,12 @@ public class OpMode2526 extends OpMode {
                 -gamepad1.right_stick_x * currentGasPedalPower
         ));
 
-        if(hardware.gamepad2_current_y && !hardware.gamepad2_previous_y){
+        if(hardware.gamepad1_current_a && !hardware.gamepad1_previous_a){
             manualControls = !manualControls;
         }
+
+
+
 
         //Manual Controls
         if(manualControls){
@@ -171,31 +174,7 @@ public class OpMode2526 extends OpMode {
             } else {
                 hardware.shooter.stop();
             }
-            //0.7 1st 0.45 2nd
-            if (hardware.gamepad2_current_b && !hardware.gamepad2_previous_b) {
-                hardware.shooter.setPower(0.7);
-            }
-            if (hardware.gamepad2_current_a && !hardware.gamepad2_previous_a) {
-                hardware.shooter.setPower(0.45);
-            }
 
-            if (hardware.gamepad2_current_dpad_up && !hardware.gamepad2_previous_dpad_up) {
-                if (shooterPower < 1) {
-                    shooterPower += 0.1;
-                }
-            }
-
-            if (hardware.gamepad2_current_dpad_right && !hardware.gamepad2_previous_dpad_right) {
-                if (shooterPower < 1) {
-                    shooterPower += 0.05;
-                }
-            }
-
-            if (hardware.gamepad2_current_dpad_down && !hardware.gamepad2_previous_dpad_down) {
-                if (shooterPower-0.1 >= 0) {
-                    shooterPower -= 0.1;
-                }
-            }
 
             if (hardware.gamepad2_current_x && !hardware.gamepad2_previous_x) {
                 if (hardware.servoGate.isOpen) {
@@ -213,7 +192,7 @@ public class OpMode2526 extends OpMode {
                     hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
                 }else{
                     hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 1, true));
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, shooterPower, true));
                 }
             }
 
@@ -230,11 +209,14 @@ public class OpMode2526 extends OpMode {
                     hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
                 }else{
                     hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
-                    hardware.robo130.addCommand(new RCOuttake(this.hardware, 1, true));
+                    hardware.robo130.addCommand(new RCOuttake(this.hardware, shooterPower, true));
                 }
             }
 
-            if(hardware.gamepad2_current_x && !hardware.gamepad2_previous_x){
+            if(hardware.gamepad2_current_x && !hardware.gamepad2_previous_x && hardware.shooter.getState() == Shooter.ACTIVEOUTTAKE){
+                hardware.robo130.addRoadrunnerCommand(new RCArtifactIntake(this.hardware, -0.1, true));
+                hardware.robo130.addRoadrunnerCommand(new RCWait(this.hardware, 0.15));
+                hardware.robo130.addRoadrunnerCommand(new RCArtifactIntake(this.hardware, 0, true));
                 hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
                 hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_OPEN,false));
                 hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
@@ -249,6 +231,23 @@ public class OpMode2526 extends OpMode {
                 hardware.robo130.addCommand(new RCOuttake(this.hardware, 0, true));
             }
 
+            if(hardware.gamepad2_current_y && !hardware.gamepad2_previous_y && hardware.shooter.getState() == Shooter.ACTIVEOUTTAKE){
+                hardware.robo130.addRoadrunnerCommand(new RCArtifactIntake(this.hardware, -0.1, true));
+                hardware.robo130.addRoadrunnerCommand(new RCWait(this.hardware, 0.15));
+                hardware.robo130.addRoadrunnerCommand(new RCArtifactIntake(this.hardware, 0, true));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_OPEN,false));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.15));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+                hardware.robo130.addCommand(new RCServoGate(this.hardware,RCServoGate.CMD_CLOSE,false));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 1, true));
+                hardware.robo130.addCommand(new RCWait(this.hardware, 0.15));
+                hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, 0, true));
+            }
+
             if(hardware.gamepad2_current_b && !hardware.gamepad2_previous_b){
                 hardware.robo130.addCommand(new RCArtifactIntake(this.hardware, -0.5, true));
                 hardware.robo130.addCommand(new RCWait(this.hardware, 0.25));
@@ -256,31 +255,35 @@ public class OpMode2526 extends OpMode {
             }
         }
 
+        //Power adjustments
+        if (hardware.gamepad2_current_dpad_up && !hardware.gamepad2_previous_dpad_up) {
+            if (shooterPower+0.1 <= 1) {
+                shooterPower += 0.1;
+            }
+        }
+
+        if (hardware.gamepad2_current_dpad_right && !hardware.gamepad2_previous_dpad_right) {
+            if (shooterPower+0.05 <= 1) {
+                shooterPower += 0.05;
+            }
+        }
+
+        if (hardware.gamepad2_current_dpad_down && !hardware.gamepad2_previous_dpad_down) {
+            if (shooterPower-0.1 >= 0) {
+                shooterPower -= 0.1;
+            }
+        }
+
+
         hardware.robo130.processCommands();
-
         hardware.loop();
-
-        prevLPower = targetLPower;
-        prevRPower = targetRPower;
-
-//        telemetry.addData("Front Distance", hardware.frontDistance.getDistance(DistanceUnit.INCH));
-//        telemetry.addData("Rear Distance", hardware.rearDistance.getDistance(DistanceUnit.INCH));
-        telemetry.addData("Delta Time", hardware.getDeltaTime());
-        telemetry.addData("Robot Command Stack: ", Integer.toString(hardware.robo130.robotCommandStack.getNumCommands())
-                + " " + Integer.toString(hardware.robo130.robotCommandStack.getCurrentCommandIndex())
-                + " " + Integer.toString(hardware.robo130.robotCommandStack.getNextCommandIndex()));
-//        telemetry.addData("Roadrunner Command Stack: ", Integer.toString(hardware.robo130.roadrunnerCommandStack.getNumCommands())
-//                + " " + Integer.toString(hardware.robo130.roadrunnerCommandStack.getCurrentCommandIndex())
-//                + " " + Integer.toString(hardware.robo130.roadrunnerCommandStack.getNextCommandIndex()));
+        telemetry.addData("Robot Command Stack: ", (hardware.robo130.robotCommandStack.getNumCommands()
+                + " " + hardware.robo130.robotCommandStack.getCurrentCommandIndex()));
+        telemetry.addData("Intake State", hardware.artifactIntake.getState());
         telemetry.addData("Status", "Running");
         telemetry.addData("Shooting power", shooterPower);
-        telemetry.addData("In Manual Mode?", manualControls);
-
-//        telemetry.addData("X position: ", hardware.odom.getPosX() / 25.4);
-//        telemetry.addData("Y position: ", hardware.odom.getPosY() / 25.4);
-//        telemetry.addData("Heading: ", hardware.odom.getHeading());
-//        telemetry.addData("Intake state: ", hardware.sampleIntake.getStateString());
-//        telemetry.addData("Specimen state: ", hardware.specimenClaw.getStateString());
+        telemetry.addData("Current Velocity", "%.2f", hardware.shooterFlyWheel.getVelocity());
+        telemetry.addData("Current Position", ("X: "+poseEstimate.position.y+" Y: "+poseEstimate.position.x+" Heading: "+poseEstimate.heading.toDouble()));
         telemetry.update();
     }
 

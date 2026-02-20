@@ -4,6 +4,9 @@ import android.os.Environment;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ftc.Encoder;
+import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
+import com.acmerobotics.roadrunner.ftc.RawEncoder;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -57,7 +60,9 @@ public class Hardware {
 
     //Shooter System
     public Shooter shooter = null;
-    public DcMotorEx shooterFlyWhell = null;
+    public DcMotorEx shooterFlyWheel = null;
+
+    public Encoder flyWheelEncoder = null;
 
     //Intake
     public DcMotorEx intakeMotor = null;
@@ -210,13 +215,7 @@ public class Hardware {
 
         drive = new MecanumDrive(hwMap, new Pose2d(0,0,0));
 
-
-        //BNO055IMU.Parameters parameters1 = new BNO055IMU.Parameters();
-        //BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
-
         robo130 = new Robot130(opMode, this);
-
-//        drive = new SampleMecanumDrive(hwMap); //Roadrunner drivetrain
 
 
         //Robot Config
@@ -226,43 +225,14 @@ public class Hardware {
         packet = new TelemetryPacket();
 
 
-
-
-        //Camera
-//        webcamPipeline = new CVPipelineAutoDetection(opMode.telemetry, robotConfiguration.isRed);
-//        double fx = 578.272;
-//        double fy = 578.272;
-//        double cx = 402.145;
-//        double cy = 221.506;
-//        double tagsize = 0.166;
-
-//        if(opMode instanceof Auto2223){
-//            webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-//                @Override
-//                public void onOpened() {
-//                    webcam.startStreaming(1280, 720, OpenCvCameraRotation.UPSIDE_DOWN);
-//                }
-//
-//                @Override
-//                public void onError(int errorCode) {
-//
-//                }
-//
-//            });
-//        }
-
-        //Distance Sensors
-//        frontDistance = hwMap.get(Rev2mDistanceSensor.class, "frontDistance");
-//        rearDistance = hwMap.get(Rev2mDistanceSensor.class, "rearDistance");
-
         //Auto Poses
         initialPose = new Pose2d(48, 48, Math.toRadians(45));
 
 
         //Shooter
-        shooterFlyWhell = hwMap.get(DcMotorEx.class, "shooter");
-        shooterFlyWhell.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        shooterFlyWhell.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooterFlyWheel = hwMap.get(DcMotorEx.class, "shooter");
+        shooterFlyWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooterFlyWheel.setDirection(DcMotor.Direction.REVERSE);
         shooter = new Shooter(opMode, this);
 
         //Artifact Intake

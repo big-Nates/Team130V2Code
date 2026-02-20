@@ -95,7 +95,7 @@ public class RobotCommandStack {
 //    }
 
     public boolean isRoadRunnerActive(){
-        if(getCurrentCommand() instanceof RCRoadrunner1){
+        if(getCurrentCommand() instanceof RCRoadrunner){
             return true;
         }else{
             return false;
@@ -149,7 +149,7 @@ public class RobotCommandStack {
 
     public void cancelFutureCommands(){
         currentRobotCommandIndex = -1;
-        nextRobotCommandIndex = robotCommands.size();
+        nextRobotCommandIndex = robotCommands.size()-1;
     }
 
 //    public void cancelFutureActions(){

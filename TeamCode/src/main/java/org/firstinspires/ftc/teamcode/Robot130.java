@@ -15,12 +15,6 @@ public class Robot130 {
     private final int READY = 1;
     public int loopState = NOT_READY;
 
-    //DROP STATES
-    private final int DROP_CONE_LIFT_MOVING_DOWN = 10;
-    private final int DROP_CONE_DROPPING = 11;
-    private final int DROP_CONE_LIFT_MOVING_UP = 12;
-
-    String[] loopListValues = {"NOT_READY", "READY", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "DROP_CONE_LIFT_MOVING_DOWN", "DROP_CONE_DROPPING", "DROP_CONE_LIFT_MOVING_UP"};
 
     public RobotCommandStack robotCommandStack = null;
     public RobotCommandStack roadrunnerCommandStack = null;
@@ -200,6 +194,11 @@ public class Robot130 {
 
     public void addToFourthStack(RobCommand command){
         fourthStack.addCommand(command);
+    }
+
+    public void cancelStacks(){
+       robotCommandStack.cancelFutureCommands();
+       roadrunnerCommandStack.cancelFutureCommands();
     }
 
 }
